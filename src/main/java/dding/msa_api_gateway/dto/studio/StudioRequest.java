@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class StudioRequest {
-    private String id;
+
     private String name;
     private String userId;
     private String description;

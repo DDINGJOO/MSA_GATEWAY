@@ -38,4 +38,21 @@ public class WebClientConfig {
                 .baseUrl(url)
                 .build();
     }
+
+    @Bean
+    public WebClient productWebClient(WebClient.Builder builder,
+                                       @Value("${service.product-bandroom.base-url}") String url) {
+        return builder
+                .baseUrl(url)
+                .build();
+    }
+
+    @Bean
+    public WebClient userWebClient(WebClient.Builder builder,
+                                      @Value("${service.user.base-url}") String url) {
+        return builder
+                .baseUrl(url)
+                .build();
+    }
+
 }

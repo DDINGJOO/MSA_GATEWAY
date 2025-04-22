@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Data
-public class BandRoomDetailResponse {
+public class BandRoomDetailResponseDto {
     private String id;
     private String name;
     private String shortDescription;
@@ -29,6 +29,8 @@ public class BandRoomDetailResponse {
 
     private String thumbnailUrl;
     private List<String> images;
+    private List<ProductResponseDto> productResponseDtos;
+    private List<StudioResponseDto> studioResponseDtos;
     private String city;
     private String district;
     private String category;

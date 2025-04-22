@@ -1,4 +1,4 @@
-package dding.msa_api_gateway.dto.studio;
+package dding.msa_api_gateway.dto.My.reponse;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,4 +15,8 @@ public class StudioResponseDto {
     private List<String> imageUrls;
     private String pricePoliciesDescription;
     private boolean isAvailable;
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
 }

@@ -1,11 +1,9 @@
 package dding.msa_api_gateway.clients.Bandroom.studio;
 
-import dding.msa_api_gateway.dto.address.response.AddressResponse;
-import dding.msa_api_gateway.dto.bandRoom.request.server.BandRoomCreateRequestDto;
-import dding.msa_api_gateway.dto.bandRoom.response.BandRoomResponse;
 import dding.msa_api_gateway.dto.studio.StudioRequest;
 import dding.msa_api_gateway.dto.studio.StudioResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -21,25 +19,32 @@ public class  StudioClient{
     }
 
 
-    public Mono<String> createStudio(StudioRequest req, String bandRoomId)
+    public Mono<String> createStudio(StudioRequest req)
     {
+        System.out.println(":ca");
         return wc.post()
-                .uri("/api/band-rooms/"+bandRoomId+"studios")
+                .uri("/api/band-rooms/studios")
                 .bodyValue(req)
                 .retrieve()
-//                .onStatus(HttpStatus::isError, resp ->
-//                        resp.bodyToMono(String.class)
-//                                .flatMap(body -> Mono.error(new RuntimeException("BFF 에러 " + body)))
-//                )
+
                 .bodyToMono(String.class);
     }
 
     public Mono<StudioResponse> getStudio(String studioId)
     {
         return wc.get()
-                .uri("/api/band-rooms"+"bandRoomId"+studioId)
+                .uri("/api/band-rooms/studios/"+studioId)
                 .retrieve()
                 .bodyToMono(StudioResponse.class);
+    }
+
+
+    public Mono<List<StudioResponse>> getStudios( String bandRoomId)
+    {
+        return wc.get()
+                .uri("/api/band-rooms/studios/readAll/"+bandRoomId)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<StudioResponse>>() {});
     }
 
 

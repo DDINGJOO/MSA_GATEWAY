@@ -1,23 +1,18 @@
 package dding.msa_api_gateway.clients.Bandroom.Bnadroom;
 
 
-import dding.msa_api_gateway.dto.address.request.AddressCreateRequestDto;
 import dding.msa_api_gateway.dto.bandRoom.request.client.BandRoomSearchRequest;
 import dding.msa_api_gateway.dto.bandRoom.request.server.BandRoomCreateRequestDto;
 
 import dding.msa_api_gateway.dto.bandRoom.response.BandRoomResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 
 import java.net.URI;
 
@@ -32,6 +27,7 @@ public class BandRoomClient {
 
     public Mono<String> createBandRoom(BandRoomCreateRequestDto req)
     {
+        System.out.println("call client");
         return wc.post()
                 .uri("/api/band-rooms")
                 .bodyValue(req)
@@ -40,7 +36,8 @@ public class BandRoomClient {
 //                        resp.bodyToMono(String.class)
 //                                .flatMap(body -> Mono.error(new RuntimeException("BFF 에러 " + body)))
 //                )
-                .bodyToMono(String.class);
+                .bodyToMono(String.class)
+                .retry(0);
     }
 
     public Mono<BandRoomResponse> getBandRoom(String bandRoomId)

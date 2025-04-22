@@ -1,19 +1,19 @@
 package dding.msa_api_gateway.controller.bandRoom;
 
 
-import dding.msa_api_gateway.clients.Bandroom.Bnadroom.BandRoomClient;
 import dding.msa_api_gateway.clients.Bandroom.studio.StudioClient;
-import dding.msa_api_gateway.clients.address.AddressClient;
+import dding.msa_api_gateway.clients.TimeManager.TimeManagerClient;
 import dding.msa_api_gateway.clients.image.ImageClient;
-import dding.msa_api_gateway.dto.My.reponse.BandRoomDetailResponse;
-import dding.msa_api_gateway.dto.address.response.AddressResponse;
-import dding.msa_api_gateway.dto.bandRoom.response.BandRoomResponse;
+import dding.msa_api_gateway.dto.bandRoom.request.client.BandRoomWeekRequest;
+import dding.msa_api_gateway.dto.studio.AvailableHourResponse;
 import dding.msa_api_gateway.dto.studio.StudioRequest;
 import dding.msa_api_gateway.dto.studio.StudioResponse;
-import dding.msa_api_gateway.dto.studio.StudioResponseDto;
+import dding.msa_api_gateway.dto.My.reponse.StudioResponseDto;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -21,20 +21,33 @@ import java.util.List;
 public class StudioController {
     private final StudioClient studioClient;
     private final ImageClient imageClient;
+    private final TimeManagerClient timeManagerClient;
 
-    public StudioController(StudioClient studioClient, AddressClient addressClient, ImageClient imageClient)
+    public StudioController(StudioClient studioClient,  ImageClient imageClient, TimeManagerClient timeManagerClient)
     {
 
         this.studioClient =studioClient;
         this.imageClient = imageClient;
+        this.timeManagerClient = timeManagerClient;
     }
 
+
+
+    // TODO: 수정 로직 아직 고려중 구현할게 너무 많앙..
+    @PostMapping("/{studioId}/weeks")
+    public Mono<String> registerStudioWeek(
+            @PathVariable(name= "studioId") String studioId,
+            @RequestBody List<BandRoomWeekRequest> req)
+    {
+        return  timeManagerClient.createBandRoomWeeks(studioId, req);
+    }
 
     @PostMapping()
     public Mono<String> createStudio(
             @RequestBody StudioRequest req)
     {
-        return  studioClient.createStudio(req,req.getBandRoomId());
+        System.out.println("coi");
+        return  studioClient.createStudio(req);
     }
 
     @GetMapping("/{studioId}")
@@ -69,4 +82,14 @@ public class StudioController {
 
 
     }
+
+    @GetMapping("/times/{bandRoomId}/{studioId}")
+    public Mono<List<AvailableHourResponse>> getAvailableTimes(
+            @PathVariable(name = "bandRoomId") String bandRoomId,
+            @PathVariable(name ="studioId") String studioId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return timeManagerClient.getAvailableTimes(bandRoomId,studioId, date);
+    }
+
 }

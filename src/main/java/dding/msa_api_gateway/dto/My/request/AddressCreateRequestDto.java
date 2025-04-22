@@ -1,4 +1,4 @@
-package dding.msa_api_gateway.dto.address.request;
+package dding.msa_api_gateway.dto.My.request;
 
 
 import lombok.*;

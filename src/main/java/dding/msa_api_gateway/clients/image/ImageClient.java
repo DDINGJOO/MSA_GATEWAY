@@ -1,13 +1,9 @@
 package dding.msa_api_gateway.clients.image;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -27,6 +23,15 @@ public class ImageClient {
                 .uri("/api/post-images/urls/{articleId}", articleId)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {});
+    }
+
+    public Mono<String> getProfileUrl(String userId)
+    {
+        return wc.get()
+                .uri("/api/profile-image/"+userId)
+                .retrieve()
+                .bodyToMono(String.class);
+
     }
 
 

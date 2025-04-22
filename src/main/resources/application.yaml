@@ -10,7 +10,24 @@ service:
     base-url: http://localhost:9200
   time-manager:
     base-url: http://localhost:9202
-
+  product-bandroom:
+    base-url: http://localhost:9301
+  user:
+    base-url : http://localhost:9101
+spring:
+  application:
+    name: dding-user-bandRoom-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/bandroom
+    username: root
+    password: 1001
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
 
 
 

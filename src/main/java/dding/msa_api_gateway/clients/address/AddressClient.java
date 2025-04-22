@@ -1,10 +1,9 @@
 package dding.msa_api_gateway.clients.address;
 
-import dding.msa_api_gateway.dto.address.request.AddressCreateRequestDto;
+import dding.msa_api_gateway.dto.My.request.AddressCreateRequestDto;
 import dding.msa_api_gateway.dto.address.response.AddressResponse;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;

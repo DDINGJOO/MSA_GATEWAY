@@ -1,11 +1,9 @@
 package dding.msa_api_gateway.dto.bandRoom.request.client;
 
 
-import dding.msa_api_gateway.dto.address.request.AddressCreateRequestDto;
+import dding.msa_api_gateway.dto.My.request.AddressCreateRequestDto;
 import dding.msa_api_gateway.dto.bandRoom.request.server.BandRoomCreateRequestDto;
-import dding.msa_api_gateway.dto.image.request.ImageUploadRequest;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

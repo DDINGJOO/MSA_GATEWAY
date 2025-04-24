@@ -240,25 +240,6 @@ public class BandRoomController {
     }
 
 
-    @PostMapping("/studios/{bandRoomId}/{studioId}/weeks")
-    public Mono<String> registerStudioWeeks(
-            @PathVariable(name= "bandRoomId") String bandRoomId,
-            @PathVariable(name= "studioId") String studioId,
-            @RequestBody List<BandRoomWeekRequest> req)
-    {
-        return  timeManagerClient.createStudioRoomWeeks(bandRoomId,studioId, req);
-    }
-
-
-    @PostMapping("/studios/{bandRoomId}/{studioId}/weeks/upDate")
-    public Mono<Void> upDateStudioWeeks(
-            @PathVariable(name= "bandRoomId") String bandRoomId,
-            @PathVariable(name= "studioId") String studioId,
-            @RequestBody List<BandRoomWeekRequest> req)
-    {
-        return  timeManagerClient.upDateStudioWeeks(bandRoomId,studioId, req);
-    }
-
 
     /// ///////////////////////////////////
 
@@ -328,3 +309,4 @@ public class BandRoomController {
 
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

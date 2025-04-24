@@ -32,15 +32,27 @@ public class StudioController {
     }
 
 
-
-    // TODO: 수정 로직 아직 고려중 구현할게 너무 많앙..
-    @PostMapping("/{studioId}/weeks")
-    public Mono<String> registerStudioWeek(
+    @PostMapping("/{bandRoomId}/{studioId}/weeks")
+    public Mono<String> registerStudioWeeks(
+            @PathVariable(name= "bandRoomId") String bandRoomId,
             @PathVariable(name= "studioId") String studioId,
             @RequestBody List<BandRoomWeekRequest> req)
     {
-        return  timeManagerClient.createBandRoomWeeks(studioId, req);
+        return  timeManagerClient.createStudioRoomWeeks(bandRoomId,studioId, req);
     }
+
+
+    @PostMapping("/{bandRoomId}/{studioId}/weeks/upDate")
+    public Mono<Void> upDateStudioWeeks(
+            @PathVariable(name= "bandRoomId") String bandRoomId,
+            @PathVariable(name= "studioId") String studioId,
+            @RequestBody List<BandRoomWeekRequest> req)
+    {
+        return  timeManagerClient.upDateStudioWeeks(bandRoomId,studioId, req);
+    }
+
+
+
 
     @PostMapping()
     public Mono<String> createStudio(

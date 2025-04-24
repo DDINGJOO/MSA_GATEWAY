@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
@@ -40,10 +43,10 @@ public class TimeManagerClient {
 
 
     //TODO: 밴드 수정 메소드랑 합쳐서 업데이트마다 동기화 구현 해야함.
-    public Mono<String> createStudioRoomWeeks(String studioId, List<BandRoomWeekRequest> req)
+    public Mono<String> createStudioRoomWeeks(String studioId, String BandRoomId, List<BandRoomWeekRequest> req)
     {
         return wc.post()
-                .uri("/api/time-manager/studios/"+studioId+"/weeks")
+                .uri("/api/time-manager/studios/+" + BandRoomId+"/"+studioId+"/weeks")
                 .bodyValue(req)
                 .retrieve()
 //                .onStatus(HttpStatus::isError, resp ->
@@ -52,6 +55,16 @@ public class TimeManagerClient {
 //                )
                 .bodyToMono(String.class);
     }
+
+    public Mono<Void> upDateStudioWeeks(String studioId, String bandRoomId, List<BandRoomWeekRequest> req) {
+        return wc.post()
+                .uri("/api/time-manager/studios/" + bandRoomId + "/" + studioId + "/weeks/upDate")
+                .bodyValue(req)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
 
     public Mono<Boolean> isBandRoomOpen(String bandRoomId, LocalDate date, LocalTime time) {
         return wc.get()

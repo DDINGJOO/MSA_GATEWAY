@@ -78,7 +78,6 @@ public class UserController {
                     ProfileResponse profile = tuple.getT1();
                     String profileImageUrl = tuple.getT2();
 
-                    // ProfileResponse 안에 프로필 이미지 URL 추가해서 반환
                     profile.setProfileImageUrl(profileImageUrl);
                     return profile;
                 });
@@ -96,9 +95,9 @@ public class UserController {
                     Flux<ProfileSimpleResponse> enriched = Flux.fromIterable(origPage.getContent())
                             .flatMap(profile -> {
                                 return imageClient.getProfileUrl(profile.getUserId())
-                                        .onErrorResume(e -> Mono.just((String) null)) // ❗ 이미지 못 찾으면 null
+                                        .onErrorResume(e -> Mono.just((String) null))
                                         .map(imageUrl -> {
-                                            profile.setProfileImageUrl(imageUrl);  // ❗ 프로필 객체에 이미지 URL 추가
+                                            profile.setProfileImageUrl(imageUrl);
                                             return profile;
                                         });
                             });

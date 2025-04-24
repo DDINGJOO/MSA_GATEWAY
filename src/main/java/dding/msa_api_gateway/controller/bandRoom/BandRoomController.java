@@ -46,7 +46,7 @@ public class BandRoomController {
     private final TimeManagerClient timeManagerClient;
     private final StudioClient studioClient;
 
-    private ProductClient productClient;
+    private final ProductClient productClient;
 
     public BandRoomController(BandRoomClient bandRoomClient, ProductClient productClient,AddressClient addressClient, ImageClient imageClient, TimeManagerClient timeManagerClient
     ,StudioClient studioClient)
@@ -207,6 +207,11 @@ public class BandRoomController {
     }
 
 
+
+
+
+    //TIME
+
     @GetMapping("/isOpen/{bandRoomId}")
     public Mono<Boolean> isBandRoomOpen(
             @PathVariable(name = "bandRoomId") String bandRoomId,
@@ -234,6 +239,25 @@ public class BandRoomController {
         return  timeManagerClient.createBandRoomWeeks(bandRoomId, req);
     }
 
+
+    @PostMapping("/studios/{bandRoomId}/{studioId}/weeks")
+    public Mono<String> registerStudioWeeks(
+            @PathVariable(name= "bandRoomId") String bandRoomId,
+            @PathVariable(name= "studioId") String studioId,
+            @RequestBody List<BandRoomWeekRequest> req)
+    {
+        return  timeManagerClient.createStudioRoomWeeks(bandRoomId,studioId, req);
+    }
+
+
+    @PostMapping("/studios/{bandRoomId}/{studioId}/weeks/upDate")
+    public Mono<Void> upDateStudioWeeks(
+            @PathVariable(name= "bandRoomId") String bandRoomId,
+            @PathVariable(name= "studioId") String studioId,
+            @RequestBody List<BandRoomWeekRequest> req)
+    {
+        return  timeManagerClient.upDateStudioWeeks(bandRoomId,studioId, req);
+    }
 
 
     /// ///////////////////////////////////
@@ -286,7 +310,6 @@ public class BandRoomController {
                 .flatMap(product -> {
                     Mono<List<String>> imageUrlsMono = imageClient.getImageUrls(product.getProductId())
                             .onErrorResume(e -> {
-                                // ❗ 이미지 못 찾으면 그냥 빈 리스트 반환
                                 return Mono.just(Collections.emptyList());
                             });
                     return imageUrlsMono.map(imageUrls ->

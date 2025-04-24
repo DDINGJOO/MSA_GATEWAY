@@ -62,6 +62,7 @@ public class BandRoomCreateRequest {
         return AddressCreateRequestDto.builder()
                 .referenceId(request.getId())
                 .addressType("BAND_ROOM")
+                .roadAddress(request.getRoadAddress())
                 .displayAddress(request.getDisplayAddress())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())

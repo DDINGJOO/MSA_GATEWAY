@@ -285,7 +285,7 @@ public class BandRoomController {
             @PathVariable(name ="bandRoomId") String bandRoomId
     )
     {
-        Mono<List<ProductResponse>> proMono = productClient.getBandRoomAllProducts(bandRoomId);
+        Mono<List<ProductResponse>> proMono = productClient.getBandRoomProducts(bandRoomId);
         return proMono
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(product -> {

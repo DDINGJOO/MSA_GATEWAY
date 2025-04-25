@@ -68,7 +68,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public Mono<ProfileResponse> getProfileWithImage(@PathVariable("userId") String userId) {
+    public Mono<ProfileResponse> getProfileWithImage(
+            @PathVariable("userId") String userId) {
         Mono<ProfileResponse> profileMono = userClient.getProfile(userId);
         Mono<String> profileImageMono = imageClient.getProfileUrl(userId)
                 .onErrorResume(e -> Mono.just((String) null));

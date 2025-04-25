@@ -45,8 +45,16 @@ public class ProductClient {
                 .bodyToMono(ProductResponse.class);
     }
 
+    public Mono<ProductResponse> updateProduct(String productId, ProductCreateRequest req) {
+        return wc.put()
+                .uri("/api/products/" + productId)
+                .bodyValue(req)
+                .retrieve()
+                .bodyToMono(ProductResponse.class);
+    }
 
-    public Mono<List<ProductResponse>> getBandRoomAllProducts(String bandRoomId)
+
+    public Mono<List<ProductResponse>> getBandRoomProducts(String bandRoomId)
     {
         return wc.get()
                 .uri("/api/products/all/"+bandRoomId)

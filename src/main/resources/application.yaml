@@ -1,27 +1,31 @@
 jwt:
-  secret_key: MY-123123
+  secret_key: ${JWT_SECRET_KEY:default-secret}
 
 service:
   address:
-    base-url: http://localhost:9201
+    base-url: ${SERVICE_ADDRESS_BASE_URL:http://localhost:9201}
   bandroom:
-    base-url: http://localhost:9300
+    base-url: ${BANDROOM_SERVICE_URL:http://localhost:9300}
   image:
-    base-url: http://localhost:9200
+    base-url: ${IMAGE_SERVICE_URL:http://localhost:9200}
   time-manager:
-    base-url: http://localhost:9202
+    base-url: ${TIME_MANAGER_SERVICE_URL:http://localhost:9202}
   product-bandroom:
-    base-url: http://localhost:9301
+    base-url: ${PRODUCT_BANDROOM_SERVICE_URL:http://localhost:9301}
   user:
-    base-url : http://localhost:9101
+    base-url: ${USER_SERVICE_URL:http://localhost:9101}
+
+server:
+  port: ${GATEWAY_PORT:9500}
+
 spring:
   application:
-    name: dding-user-bandRoom-service
+    name: dding-user-apigateway-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/bandroom
-    username: root
-    password: 1001
+    url: jdbc:mysql://host.docker.internal:3306/bandroom
+    username: ${BANDROOM_DB_USERNAME:root}
+    password: ${BANDROOM_DB_PASSWORD:1001}
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     open-in-view: false
@@ -32,6 +36,4 @@ spring:
 
 
 
-server:
 
-  port: 9500

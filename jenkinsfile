@@ -1,39 +1,30 @@
 pipeline {
-  agent any   // 어떤 노드에서나 실행
+  agent any
 
   environment {
-    IMAGE_NAME = 'msa-gateway'   // 만들어질 Docker 이미지 이름
-    CONTAINER_NAME = 'msa-gateway'  // 띄울 컨테이너 이름
-    CONTAINER_PORT = '9500'     // 사용할 포트
+    COMPOSE_PROJECT_NAME = 'msa_gateway'   // 도커 컴포즈 프로젝트 이름 (원하는 대로)
   }
 
   stages {
     stage('Clone Repository') {
       steps {
-        git branch: 'main', url: 'https://github.com/https://github.com/DDINGJOO/MSA_GATEWAY.git'
+        git branch: 'main', url: 'https://github.com/DDINGJOO/MSA_GATEWAY.git.git'
       }
     }
 
-    stage('Build Docker Image') {
+    stage('Stop Existing Containers') {
       steps {
-        sh "docker build -t ${IMAGE_NAME} ."
+        sh '''
+          docker-compose down || true
+        '''
       }
     }
 
-    stage('Stop & Remove Old Container') {
+    stage('Build & Run with Docker Compose') {
       steps {
-        sh """
-          docker stop ${CONTAINER_NAME} || true
-          docker rm ${CONTAINER_NAME} || true
-        """
-      }
-    }
-
-    stage('Run New Container') {
-      steps {
-        sh """
-          docker run -d --name ${CONTAINER_NAME} -p ${CONTAINER_PORT}:${CONTAINER_PORT} ${IMAGE_NAME}
-        """
+        sh '''
+          docker-compose --env-file .env up --build -d
+        '''
       }
     }
   }

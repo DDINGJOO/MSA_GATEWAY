@@ -13,7 +13,7 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)  // 🔥 CSRF 비활성화
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)  // CSRF 비활성화
                 .authorizeExchange(exchange -> exchange
                         .anyExchange().permitAll()
                 )

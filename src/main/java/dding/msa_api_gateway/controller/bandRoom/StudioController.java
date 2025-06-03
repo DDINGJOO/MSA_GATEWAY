@@ -95,10 +95,10 @@ public class StudioController {
 
     }
 
-    @GetMapping("/times/{bandRoomId}/{studioId}")
+    @GetMapping("/times")
     public Mono<List<AvailableHourResponse>> getAvailableTimes(
-            @PathVariable(name = "bandRoomId") String bandRoomId,
-            @PathVariable(name ="studioId") String studioId,
+            @RequestParam(name = "bandRoomId") String bandRoomId,
+            @RequestParam(name ="studioId") String studioId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         return timeManagerClient.getAvailableTimes(bandRoomId,studioId, date);

@@ -14,6 +14,8 @@ service:
     base-url: ${PRODUCT_BANDROOM_SERVICE_URL:http://localhost:9301}
   user:
     base-url: ${USER_SERVICE_URL:http://localhost:9101}
+  band:
+    base-url: ${BAND_SERVICE_URL:http://localhost:9400}
 
 server:
   port: ${GATEWAY_PORT:9500}
@@ -32,6 +34,18 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
+  data:
+    redis:
+      host: dding-board-redis
+      port: 6379
+
+
+
+
+kakao:
+  client_id: ${KAKAO_CLIENT_ID}
+  redirect_uri_mobile: http://10.0.2.2:9100/kakao/callback
+  redirect_uri_pc: ${KAKAO_REDIRECT_URI_PC}
 
 
 

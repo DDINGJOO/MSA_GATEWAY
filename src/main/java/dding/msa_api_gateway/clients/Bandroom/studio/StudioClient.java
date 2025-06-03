@@ -26,7 +26,6 @@ public class  StudioClient{
                 .uri("/api/band-rooms/studios")
                 .bodyValue(req)
                 .retrieve()
-
                 .bodyToMono(String.class);
     }
 
@@ -46,6 +45,4 @@ public class  StudioClient{
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<StudioResponse>>() {});
     }
-
-
 }

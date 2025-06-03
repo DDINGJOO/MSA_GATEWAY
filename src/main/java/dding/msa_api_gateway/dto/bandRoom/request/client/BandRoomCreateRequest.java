@@ -30,15 +30,12 @@ public class BandRoomCreateRequest {
 
     private String notes;
 
-
-
-
+    private Double latitude;
+    private Double longitude;
 
     private String roadAddress;
     private String detailAddress;
 
-    private Double latitude;
-    private Double longitude;
 
     public BandRoomCreateRequestDto toBandRoomCreateDto (BandRoomCreateRequest request)
     {

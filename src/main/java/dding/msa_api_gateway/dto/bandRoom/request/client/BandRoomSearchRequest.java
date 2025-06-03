@@ -1,6 +1,7 @@
 package dding.msa_api_gateway.dto.bandRoom.request.client;
 
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.time.LocalTime;
 
 @Getter
 @Setter
+@Builder
 public class BandRoomSearchRequest {
     private String name;
     private String keyword;

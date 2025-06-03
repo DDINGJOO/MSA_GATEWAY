@@ -55,4 +55,13 @@ public class WebClientConfig {
                 .build();
     }
 
+
+    @Bean
+    public WebClient bandWebClient(WebClient.Builder builder,
+                                   @Value("${service.band.base-url}") String url) {
+        return builder
+                .baseUrl(url)
+                .build();
+    }
+
 }

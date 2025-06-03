@@ -7,14 +7,123 @@ services:
     container_name: gateway
     ports:
       - "${GATEWAY_PORT}:9500"
+    depends_on:
+      - bandroom-service
+      - reservation-service
+      - profile-service
+      - time-manager-service
+      - image-service
+      - review-service
+      - auth-service
+      - band-service
+      - address-service
+
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - SERVICE_ADDRESS_BASE_URL=${SERVICE_ADDRESS_BASE_URL}
-      - BANDROOM_SERVICE_URL=${BANDROOM_SERVICE_URL}
-      - USER_SERVICE_URL=${USER_SERVICE_URL}
-      - IMAGE_SERVICE_URL=${IMAGE_SERVICE_URL}
-      - TIME_MANAGER_SERVICE_URL=${TIME_MANAGER_SERVICE_URL}
-      - PRODUCT_BANDROOM_SERVICE_URL=${PRODUCT_BANDROOM_SERVICE_URL}
-      - BANDROOM_DB_USERNAME=${BANDROOM_DB_USERNAME}
-      - BANDROOM_DB_PASSWORD=${BANDROOM_DB_PASSWORD}
 
+
+      - BANDROOM_SERVICE_URL=http://bandroom-service:9300
+      - PRODUCT_BANDROOM_SERVICE_URL=http://reservation-service:9301
+      - USER_SERVICE_URL=http://profile-service:9101
+      - IMAGE_SERVICE_URL=http://image-service:9200
+      - TIME_MANAGER_SERVICE_URL=http://time-manager-service:9202
+      - REVIEW_SERVICE_URL=http://review-service:9102
+      - AUTH_SERVICE_URL=http://auth-service:9100
+      - BAND_SERVICE_URL=http://band-service:9400
+      - SERVICE_ADDRESS_BASE_URL=http://address-service:9201
+
+    networks:
+      - backend
+
+  bandroom-service:
+    image: service-bandroom-service
+    container_name: bandroom-service
+    ports:
+      - "9300:9300"
+    networks:
+      - backend
+
+  reservation-service:
+    image: service-reservation-service
+    container_name: reservation-service
+    ports:
+      - "9301:9301"
+    networks:
+      - backend
+
+  profile-service:
+    image: service-profile-service
+    container_name: profile-service
+    ports:
+      - "9101:9101"
+    networks:
+      - backend
+
+  time-manager-service:
+    image: service-time-manager-service
+    container_name: time-manager-service
+    ports:
+      - "9202:9202"
+    networks:
+      - backend
+
+  image-service:
+    image: service-image-service
+    container_name: image-service
+    ports:
+      - "9200:9200"
+    networks:
+      - backend
+  address-service:
+    image: service-address-service
+    container_name: address-service
+    ports:
+      - "9201:9201"
+    networks:
+      - backend
+
+  review-service:
+    image: service-review-service
+    container_name: review-service
+    ports:
+      - "9102:9102"
+    networks:
+      - backend
+  band-service:
+    image: service-band-service
+    container_name: band-service
+    ports:
+            - "9400:9400"
+    networks:
+            - backend
+
+  auth-service:
+    image: service-auth-service
+    container_name: auth-service
+    ports:
+      - "9100:9100"
+    environment:
+      - SPRING_REDIS_HOST=dding-board-redis
+      - SPRING_REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  redis:
+    container_name: dding-board-redis
+    image: redis
+    ports:
+      - "6379:6379"
+
+  mysql:
+      image: mysql:8.0
+      container_name: mysql
+      ports:
+        - "3306:3306"
+      environment:
+        MYSQL_ROOT_PASSWORD: 1001
+      volumes:
+        - ./data/mysql:/var/lib/mysql
+
+networks:
+  backend:
+    driver: bridge

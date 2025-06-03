@@ -7,8 +7,7 @@ import dding.msa_api_gateway.clients.TimeManager.TimeManagerClient;
 import dding.msa_api_gateway.clients.address.AddressClient;
 import dding.msa_api_gateway.clients.image.ImageClient;
 import dding.msa_api_gateway.clients.reservation.ProductClient;
-import dding.msa_api_gateway.dto.My.reponse.BandRoomCardResponseDto;
-import dding.msa_api_gateway.dto.My.reponse.BandRoomDetailResponseDto;
+import dding.msa_api_gateway.dto.My.reponse.*;
 import dding.msa_api_gateway.dto.My.request.AddressCreateRequestDto;
 import dding.msa_api_gateway.dto.address.response.AddressResponse;
 import dding.msa_api_gateway.dto.bandRoom.request.client.BandRoomCreateRequest;
@@ -18,12 +17,8 @@ import dding.msa_api_gateway.dto.bandRoom.request.server.BandRoomCreateRequestDt
 import dding.msa_api_gateway.dto.bandRoom.response.BandRoomResponse;
 import dding.msa_api_gateway.dto.product.ProductCreateRequest;
 import dding.msa_api_gateway.dto.product.ProductResponse;
-import dding.msa_api_gateway.dto.My.reponse.ProductResponseDto;
 import dding.msa_api_gateway.dto.studio.StudioResponse;
-import dding.msa_api_gateway.dto.My.reponse.StudioResponseDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +28,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/bander/bandroom")
@@ -83,51 +76,7 @@ public class BandRoomController {
     }
 
 
-    @GetMapping("/list")
-    public Mono<ResponseEntity<Page<BandRoomCardResponseDto>>> getBandRooms(
-            @ModelAttribute BandRoomSearchRequest req,
-            @PageableDefault(size = 10, sort = "name") Pageable pageable
-    ) {
-        return bandRoomClient.getBandRooms(req, pageable)
-                .flatMap(origPage -> {
-                    Flux<BandRoomCardResponseDto> enriched = Flux.fromIterable(origPage.getContent())
-                            .flatMap(bandRoom -> {
-                                Mono<AddressResponse> addrMono   = addressClient.getAddress(bandRoom.getId());
-                                Mono<List<String>>     imgsMono   = imageClient.getImageUrls(bandRoom.getId())
-                                        .onErrorResume(e -> {
-                                            // ❗ 이미지 못 찾으면 그냥 빈 리스트 반환
-                                            return Mono.just(Collections.emptyList());
-                                        });
-                                // date가 있으면 isOpen 호출, 없으면 Mono.just(null)
-                                Mono<Boolean>          openMono = timeManagerClient.isBandRoomOpen(bandRoom.getId(), req.getDate(), req.getTime());
 
-                                return Mono.zip(Mono.just(bandRoom), addrMono, imgsMono, openMono)
-                                        .map(tuple -> {
-                                            BandRoomResponse b       = tuple.getT1();
-                                            AddressResponse  a       = tuple.getT2();
-                                            List<String>     imgs    = tuple.getT3();
-                                            Boolean          isOpen  = tuple.getT4();
-
-                                            return BandRoomCardResponseDto.builder()
-                                                    .id(b.getId())
-                                                    .name(b.getName())
-                                                    .shortDescription(b.getShortDescription())
-                                                    .roadAddress(a.getRoadAddress())
-                                                    .city(a.getCity())
-                                                    .district(a.getDistrict())
-                                                    .thumbnailUrl(imgs.isEmpty() ? null : imgs.getFirst())
-                                                    // date 파라미터가 없었다면 null, 있었다면 true/false
-                                                    .isOpen(isOpen)
-                                                    .build();
-                                        });
-                            });
-
-                    return enriched
-                            .collectList()
-                            .map(list -> new PageImpl<>(list, pageable, origPage.getTotalElements()));
-                })
-                .map(ResponseEntity::ok);
-    }
 
     @GetMapping("/detail/{bandRoomId}")
     public Mono<BandRoomDetailResponseDto> getBandRoomDetail(@PathVariable(name = "bandRoomId") String bandRoomId)
@@ -176,6 +125,9 @@ public class BandRoomController {
                             .build();
                 });
     }
+
+
+
     @GetMapping("/studios/{bandRoomId}")
     public Mono<List<StudioResponseDto>> getStudios(@PathVariable(name = "bandRoomId") String bandRoomId) {
         Mono<List<StudioResponse>> studioMono = studioClient.getStudios(bandRoomId);
@@ -186,7 +138,6 @@ public class BandRoomController {
                     // 각 Studio에 대해 이미지 조회
                     Mono<List<String>> imageUrlsMono = imageClient.getImageUrls(studio.getId())
                             .onErrorResume(e -> {
-                                // ❗ 이미지 못 찾으면 그냥 빈 리스트 반환
                                 return Mono.just(Collections.emptyList());
                             });
 
@@ -207,33 +158,76 @@ public class BandRoomController {
     }
 
 
+    @GetMapping("/list")
+    public Mono<Page<BandRoomCardResponseDto>> list(
+            BandRoomSearchRequest req,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name,ASC") List<String> sort,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time
+    ) {
+        // 1) 검색 DTO
+        BandRoomSearchRequestDto dto = BandRoomSearchRequestDto.builder()
+                .isOpen(req.getIsOpen())
+                .keyword(req.getKeyword())
+                .name(req.getName())
+                .roadAddress(req.getRoadAddress())
+                .build();
+
+        // 2) Pageable
+        Sort s = Sort.by(sort.stream()
+                .map(o -> {
+                    String[] parts = o.split(",");
+                    return new Sort.Order(
+                            Sort.Direction.fromString(parts[1].trim()),
+                            parts[0].trim()
+                    );
+                })
+                .toList());
+        Pageable pg = PageRequest.of(page, size, s);
+
+        // 3) 원본 페이지 가져오기
+        return bandRoomClient.getBandRooms(dto, pg)
+                .flatMap(pageImpl -> {
+                    // 4) 각 방마다 isOpen 조회 → Card DTO 변환
+                    var monos = pageImpl.getContent().stream()
+                            .map(room -> timeManagerClient
+                                    .isBandRoomOpen(room.getId(), date, time)
+                                    .map(isOpen -> BandRoomCardResponseDto.from(room, isOpen))
+                            ).toList();
+
+                    return Flux.concat(monos)
+                            .collectList()
+                            .map(cards -> new PageImpl<>(
+                                    cards,
+                                    pg,
+                                    pageImpl.getTotalElements()
+                            ));
+                });
+    }
 
 
 
     //TIME
 
-    @GetMapping("/isOpen/{bandRoomId}")
-    public Mono<Boolean> isBandRoomOpen(
-            @PathVariable(name = "bandRoomId") String bandRoomId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time
-    ) {
-        return timeManagerClient.isBandRoomOpen(bandRoomId, date, time);
-    }
 
-    @GetMapping("/isOpen/{bandRoomId}/{studioId}")
+    @GetMapping("/isOpen")
     public Mono<Boolean> isStudioOpen(
-            @PathVariable(name = "bandRoomId") String bandRoomId,
-            @PathVariable(name ="studioId") String studioId,
+            @RequestParam(name = "bandRoomId") String bandRoomId,
+            @RequestParam (required = false) String studioId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time
     ) {
-        return timeManagerClient.isStudioOpen(bandRoomId,studioId, date, time);
+        if(studioId == null) {
+            return timeManagerClient.isBandRoomOpen(bandRoomId, date, time);
+        }
+        return timeManagerClient.isStudioOpen(bandRoomId, studioId, date, time);
     }
 
-    @PostMapping("/weeks/{bandRoomId}")
+    @PostMapping("/weeks")
     public Mono<String> registerBandRoomWeeks(
-            @PathVariable(name= "bandRoomId") String bandRoomId,
+            @RequestParam(name= "bandRoomId") String bandRoomId,
             @RequestBody List<BandRoomWeekRequest> req)
     {
         return  timeManagerClient.createBandRoomWeeks(bandRoomId, req);
@@ -243,9 +237,9 @@ public class BandRoomController {
 
     /// ///////////////////////////////////
 
-    @PostMapping("/products/{bandRoomId}")
+    @PostMapping("/products")
     public Mono<ProductResponse> createProduct(
-            @PathVariable(name ="bandRoomId") String bandRoomId,
+            @RequestParam(name ="bandRoomId") String bandRoomId,
             @RequestBody ProductCreateRequest req
             )
     {
@@ -260,7 +254,6 @@ public class BandRoomController {
         Mono<ProductResponse> productMono = productClient.getProduct(productId);
         Mono<List<String>> images = imageClient.getImageUrls(productId)
                 .onErrorResume(e -> {
-                    // ❗ 이미지 못 찾으면 그냥 빈 리스트 반환
                     return Mono.just(Collections.emptyList());
                 });
 
@@ -279,10 +272,36 @@ public class BandRoomController {
                 });
     }
 
+    @PutMapping("/products")
+    public Mono<ProductResponseDto> updateProduct(
+            @RequestParam(name ="productId") String productId,
+            @RequestBody ProductCreateRequest req
+    )
+    {
+        Mono<ProductResponse> productMono = productClient.updateProduct(productId,req);
+        Mono<List<String>> images = imageClient.getImageUrls(productId)
+                .onErrorResume(e -> {
+                    return Mono.just(Collections.emptyList());
+                });
+        return Mono.zip( images, productMono)
+                .map(tuple ->{
+                    List<String> i = tuple.getT1();
+                    ProductResponse p = tuple.getT2();
 
-    @GetMapping("/products/list/{bandRoomId}")
+                    return ProductResponseDto.builder()
+                            .description(p.getDescription())
+                            .name(p.getName())
+                            .productId(p.getProductId())
+                            .thumbnailUrl(i.isEmpty() ? null : i.get(0))
+                            .price(p.getPrice())
+                            .build();
+                });
+    }
+
+
+    @GetMapping("/products/list")
     public Mono<List<ProductResponseDto>> getAllProducts(
-            @PathVariable(name ="bandRoomId") String bandRoomId
+            @RequestParam(name ="bandRoomId") String bandRoomId
     )
     {
         Mono<List<ProductResponse>> proMono = productClient.getBandRoomProducts(bandRoomId);

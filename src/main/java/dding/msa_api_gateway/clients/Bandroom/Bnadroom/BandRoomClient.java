@@ -1,12 +1,13 @@
 package dding.msa_api_gateway.clients.Bandroom.Bnadroom;
 
 
-import dding.msa_api_gateway.dto.bandRoom.request.client.BandRoomSearchRequest;
+import dding.msa_api_gateway.dto.My.reponse.BandRoomSearchRequestDto;
 import dding.msa_api_gateway.dto.bandRoom.request.server.BandRoomCreateRequestDto;
 
 import dding.msa_api_gateway.dto.bandRoom.response.BandRoomResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
@@ -47,45 +48,40 @@ public class BandRoomClient {
                 .retrieve()
                 .bodyToMono(BandRoomResponse.class);
     }
-
-    public Mono<Page<BandRoomResponse>> getBandRooms(
-            BandRoomSearchRequest req,
+    public Mono<PageImpl<BandRoomResponse>> getBandRooms(
+            BandRoomSearchRequestDto req,
             Pageable pageable
     ) {
         return wc.get()
-                // baseUrl 이 이미 http://…/api/bander/bandroom 으로 설정되어 있다고 가정
                 .uri(uriBuilder -> buildListUri(uriBuilder, req, pageable))
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Page<BandRoomResponse>>() {});
+                // Page<…> 대신 PageImpl<…> 로 명시
+                .bodyToMono(new ParameterizedTypeReference<PageImpl<BandRoomResponse>>() {})
+                ;
     }
 
     private URI buildListUri(
             UriBuilder uriBuilder,
-            BandRoomSearchRequest req,
+            BandRoomSearchRequestDto req,
             Pageable pageable
     ) {
         UriBuilder b = uriBuilder
-                .path("/list")
+                .path("/api/band-rooms/list")
                 .queryParam("page",  pageable.getPageNumber())
                 .queryParam("size",  pageable.getPageSize());
 
-        // sort 파라미터: 예) sort=name,ASC
+        // name,ASC 기본 정렬은 Pageable에 이미 설정되어 있다고 가정
         pageable.getSort().forEach(order ->
                 b.queryParam("sort", order.getProperty() + "," + order.getDirection())
         );
 
-        // 검색 필터가 있다면
         if (req.getName() != null) {
             b.queryParam("name", req.getName());
         }
-        if (req.getCategory() != null) {
-            b.queryParam("category", req.getCategory());
+        if (req.getRoadAddress() != null) {
+            b.queryParam("address", req.getRoadAddress());
         }
-        // … 필요에 따라 다른 req 필드도 추가
 
         return b.build();
     }
 }
-
-
-

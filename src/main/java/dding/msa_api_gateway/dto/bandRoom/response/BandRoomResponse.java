@@ -18,6 +18,7 @@ public class BandRoomResponse {
     private List<String> keywords;
     private List<String> homepageUrls;
     private String notes;
+
 }
 
 
